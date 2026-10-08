@@ -36,6 +36,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+    @ExceptionHandler(InvalidRoleChangeException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRoleChange(InvalidRoleChangeException ex) {
+        return build(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage());
