@@ -2,6 +2,7 @@
 
 A full-stack team collaboration and project management platform (think a simplified Trello + Slack), built as a portfolio project.
 
+**Author:** Soufiane Ammari
 **Status: under active development — Phase 13 (Docker) complete.**
 
 ## Stack
@@ -77,3 +78,7 @@ curl -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/
 
 curl http://localhost:8080/api/users/me -H "Authorization: Bearer <token from login>"
 ```
+
+## License
+
+MIT — see [LICENSE](LICENSE). Copyright (c) 2026 Soufiane Ammari.
