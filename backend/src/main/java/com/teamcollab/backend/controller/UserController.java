@@ -1,13 +1,16 @@
 package com.teamcollab.backend.controller;
 
+import com.teamcollab.backend.dto.UpdateProfileRequest;
 import com.teamcollab.backend.dto.UpdateRoleRequest;
 import com.teamcollab.backend.dto.UserResponse;
 import com.teamcollab.backend.security.UserPrincipal;
 import com.teamcollab.backend.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,6 +27,23 @@ public class UserController {
     @GetMapping("/me")
     public UserResponse me(@AuthenticationPrincipal UserPrincipal principal) {
         return UserResponse.from(principal.getUser());
+    }
+
+    @PatchMapping("/me")
+    public UserResponse updateMe(@Valid @RequestBody UpdateProfileRequest request,
+                                  @AuthenticationPrincipal UserPrincipal principal) {
+        return UserResponse.from(userService.updateProfile(principal.getUser(), request));
+    }
+
+    @PostMapping(value = "/me/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public UserResponse uploadAvatar(@RequestParam("file") MultipartFile file,
+                                      @AuthenticationPrincipal UserPrincipal principal) {
+        return UserResponse.from(userService.updateAvatar(principal.getUser(), file));
+    }
+
+    @DeleteMapping("/me/avatar")
+    public UserResponse removeAvatar(@AuthenticationPrincipal UserPrincipal principal) {
+        return UserResponse.from(userService.removeAvatar(principal.getUser()));
     }
 
     @GetMapping

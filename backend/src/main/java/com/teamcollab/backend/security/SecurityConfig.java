@@ -72,7 +72,7 @@ public class SecurityConfig {
                 // No HttpSession is created or read - every request must carry its own valid JWT.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/health", "/ws/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/health", "/ws/**", "/api/avatars/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex

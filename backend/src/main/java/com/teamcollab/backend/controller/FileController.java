@@ -4,7 +4,9 @@ import com.teamcollab.backend.dto.FileUploadResponse;
 import com.teamcollab.backend.entity.FileUpload;
 import com.teamcollab.backend.security.UserPrincipal;
 import com.teamcollab.backend.service.FileUploadService;
+import com.teamcollab.backend.storage.FileStorageService;
 import org.springframework.core.io.Resource;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,14 +18,45 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 public class FileController {
 
-    private final FileUploadService fileUploadService;
+    // Avatars aren't tracked as FileUpload metadata (no project/uploader bookkeeping needed),
+    // so content type is inferred from the stored extension rather than looked up from a record.
+    private static final Map<String, String> IMAGE_CONTENT_TYPES = Map.of(
+            "png", "image/png",
+            "jpg", "image/jpeg",
+            "jpeg", "image/jpeg",
+            "gif", "image/gif",
+            "webp", "image/webp"
+    );
 
-    public FileController(FileUploadService fileUploadService) {
+    private final FileUploadService fileUploadService;
+    private final FileStorageService fileStorageService;
+
+    public FileController(FileUploadService fileUploadService, FileStorageService fileStorageService) {
         this.fileUploadService = fileUploadService;
+        this.fileStorageService = fileStorageService;
+    }
+
+    // Public and unauthenticated on purpose: <img> tags can't attach an Authorization header,
+    // and a profile picture isn't sensitive enough to need one.
+    @GetMapping("/api/avatars/{filename}")
+    public ResponseEntity<Resource> avatar(@PathVariable String filename) {
+        Resource resource = fileStorageService.loadAsResource(filename);
+        String extension = filename.contains(".")
+                ? filename.substring(filename.lastIndexOf('.') + 1).toLowerCase(Locale.ROOT)
+                : "";
+        String contentType = IMAGE_CONTENT_TYPES.getOrDefault(extension, MediaType.APPLICATION_OCTET_STREAM_VALUE);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS))
+                .body(resource);
     }
 
     @GetMapping("/api/projects/{projectId}/files")
