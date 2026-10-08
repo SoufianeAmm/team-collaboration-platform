@@ -1,0 +1,36 @@
+# Environment / secrets
+.env
+.env.local
+
+# Uploaded files (local dev storage) — keep the folder, ignore its contents
+/uploads/*
+!/uploads/.gitkeep
+backend/uploads/
+
+# Background dev server PID files
+*.pid
+
+# SQLite database files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Dependency/build output (also covered by nested .gitignores, kept here for clarity)
+node_modules/
+dist/
+target/
+build/
