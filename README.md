@@ -79,6 +79,21 @@ curl -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/
 curl http://localhost:8080/api/users/me -H "Authorization: Bearer <token from login>"
 ```
 
+## Development notes
+
+This project was built in close collaboration with Claude (Anthropic), used as a pair-programming partner throughout. I drove every product and architecture decision, learned the underlying concepts as the project progressed, and directed each phase; Claude handled implementation and explained the reasoning behind each piece along the way.
+
+### What I learned
+
+- **Layered backend architecture** — why controllers, services, and repositories are kept separate (HTTP handling vs. business logic vs. database access), and why that separation is what keeps one failing request from affecting any other
+- **Stateless JWT authentication** — how a signed token replaces server-side sessions, and the security tradeoffs that come with it
+- **Real-time features over WebSockets** — STOMP messaging for live chat, task board updates, and notifications, and why that's a separate model from normal request/response REST calls
+- **Docker multi-stage builds** — why build tools (Maven, Node) and runtime environments are kept in separate stages, so the final image only ships what's actually needed to run
+- **Reverse proxying** — how nginx routing `/api` and `/ws` to the backend collapses two containers into what the browser sees as a single origin, eliminating CORS entirely instead of configuring around it
+- **Monolith vs. microservices** — the real tradeoff isn't "microservices are better," it's fault isolation and independent scaling vs. the operational complexity of coordinating many separately-deployed services over a network
+- **SQLite's actual limits** — it's a genuinely solid database for low-to-moderate write concurrency on a single server; it's horizontal scaling (multiple backend instances) that requires moving to something like Postgres, not raw data size
+- **Writing a clean git history** — organizing a large body of work into commits grouped by feature, instead of one dump, so the project's story is actually readable by someone skimming the log
+
 ## License
 
 MIT — see [LICENSE](LICENSE). Copyright (c) 2026 Soufiane Ammari.
