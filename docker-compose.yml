@@ -1,0 +1,37 @@
+services:
+  backend:
+    build: ./backend
+    expose:
+      - "8080"
+    ports:
+      # Published mainly for direct debugging (curl, etc) - the app itself reaches the backend
+      # through the frontend's nginx proxy, not this port.
+      - "8081:8080"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-dev-only-insecure-secret-change-this-before-any-real-deployment}
+      CORS_ALLOWED_ORIGIN: http://localhost:8080
+      DEADLINE_CHECK_CRON: ${DEADLINE_CHECK_CRON:-0 0 8 * * *}
+    volumes:
+      - sqlite-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: /api
+    ports:
+      - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  sqlite-data:

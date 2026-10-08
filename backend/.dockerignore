@@ -1,0 +1,6 @@
+target
+app.db
+uploads
+run.pid
+backend.log
+.mvn/wrapper/maven-wrapper.jar
