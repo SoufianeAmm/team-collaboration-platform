@@ -2,8 +2,10 @@
 
 A full-stack team collaboration and project management platform (think a simplified Trello + Slack), built as a portfolio project.
 
+[![CI](https://github.com/SoufianeAmm/team-collaboration-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/SoufianeAmm/team-collaboration-platform/actions/workflows/ci.yml)
+
 **Author:** Soufiane Ammari
-**Status: under active development — Phase 13 (Docker) complete.**
+**Status: under active development — Phase 14 (CI) complete.**
 
 ## Stack
 
@@ -28,7 +30,7 @@ This README will be expanded with architecture diagrams, feature docs, and setup
 - [x] Phase 11 — Real-time task updates
 - [x] Phase 12 — Notifications
 - [x] Phase 13 — Docker
-- [ ] Phase 14 — GitHub Actions CI/CD
+- [x] Phase 14 — GitHub Actions CI
 - [ ] Phase 15 — Testing and polishing
 
 ## Running with Docker
@@ -78,6 +80,16 @@ curl -X POST http://localhost:8080/api/auth/login -H "Content-Type: application/
 
 curl http://localhost:8080/api/users/me -H "Authorization: Bearer <token from login>"
 ```
+
+## Continuous Integration
+
+Every push and pull request to `master` triggers a GitHub Actions workflow ([.github/workflows/ci.yml](.github/workflows/ci.yml)) that:
+
+- builds and runs the backend's tests (`./mvnw clean verify`)
+- lints, typechecks, and builds the frontend (`npm run lint`, `npm run build`)
+- builds both Docker images, to catch any drift between the source and the Dockerfiles
+
+No deployment step — this is CI only (build/test automation), not CD. The badge at the top of this README reflects whether the latest commit actually builds cleanly.
 
 ## Development notes
 
