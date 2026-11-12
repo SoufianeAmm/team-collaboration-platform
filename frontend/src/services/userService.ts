@@ -11,6 +11,22 @@ export async function updateUserRole(id: number, role: Role): Promise<User> {
   return data;
 }
 
+export interface AdminUpdateUserRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password?: string;
+}
+
+export async function updateUser(id: number, request: AdminUpdateUserRequest): Promise<User> {
+  const { data } = await api.patch<User>(`/users/${id}`, request);
+  return data;
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  await api.delete(`/users/${id}`);
+}
+
 export async function updateProfile(firstName: string, lastName: string): Promise<User> {
   const { data } = await api.patch<User>("/users/me", { firstName, lastName });
   return data;

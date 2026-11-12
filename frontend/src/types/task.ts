@@ -11,7 +11,7 @@ export interface Task {
   priority: TaskPriority;
   assignedUser: User | null;
   projectId: number;
-  createdBy: User;
+  createdBy: User | null;
   dueDate: string | null;
   createdAt: string;
   updatedAt: string;

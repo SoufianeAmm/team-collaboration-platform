@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Users, ShieldCheck, Briefcase } from "lucide-react";
+import type { FormEvent } from "react";
+import { Users, ShieldCheck, Briefcase, Pencil, Trash2 } from "lucide-react";
 import { Avatar } from "../components/Avatar";
+import { Modal } from "../components/Modal";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { getErrorMessage } from "../services/api";
@@ -20,13 +22,16 @@ export function AdminPage() {
   const [users, setUsers] = useState<User[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  useEffect(() => {
+  function load() {
     userService
       .listUsers()
       .then(setUsers)
       .catch((err) => setError(getErrorMessage(err)));
-  }, []);
+  }
+
+  useEffect(load, []);
 
   async function handleRoleChange(targetUser: User, role: Role) {
     if (role === targetUser.role) return;
@@ -35,6 +40,20 @@ export function AdminPage() {
       const updated = await userService.updateUserRole(targetUser.id, role);
       setUsers((prev) => prev!.map((u) => (u.id === updated.id ? updated : u)));
       showToast(`${updated.firstName} ${updated.lastName} is now ${ROLE_OPTION_LABEL[updated.role]}`);
+    } catch (err) {
+      showToast(getErrorMessage(err), "error");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  async function handleDelete(targetUser: User) {
+    if (!confirm(`Delete ${targetUser.firstName} ${targetUser.lastName}? This cannot be undone.`)) return;
+    setSavingId(targetUser.id);
+    try {
+      await userService.deleteUser(targetUser.id);
+      setUsers((prev) => prev!.filter((u) => u.id !== targetUser.id));
+      showToast(`${targetUser.firstName} ${targetUser.lastName} deleted`);
     } catch (err) {
       showToast(getErrorMessage(err), "error");
     } finally {
@@ -98,6 +117,7 @@ export function AdminPage() {
               <th>Email</th>
               <th>Joined</th>
               <th>Role</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -138,12 +158,124 @@ export function AdminPage() {
                       ))}
                     </select>
                   </td>
+                  <td>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setEditingUser(u)}
+                        disabled={savingId === u.id}
+                        aria-label="Edit user"
+                      >
+                        <Pencil size={14} strokeWidth={2.2} />
+                      </button>
+                      <button
+                        className="btn btn-danger"
+                        onClick={() => handleDelete(u)}
+                        disabled={isSelf || savingId === u.id}
+                        aria-label="Delete user"
+                      >
+                        <Trash2 size={14} strokeWidth={2.2} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       )}
+
+      {editingUser && (
+        <EditUserModal
+          user={editingUser}
+          onClose={() => setEditingUser(null)}
+          onSaved={(updated) => {
+            setUsers((prev) => prev!.map((u) => (u.id === updated.id ? updated : u)));
+            setEditingUser(null);
+            showToast(`${updated.firstName} ${updated.lastName} updated`);
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function EditUserModal({
+  user,
+  onClose,
+  onSaved,
+}: {
+  user: User;
+  onClose: () => void;
+  onSaved: (updated: User) => void;
+}) {
+  const [firstName, setFirstName] = useState(user.firstName);
+  const [lastName, setLastName] = useState(user.lastName);
+  const [email, setEmail] = useState(user.email);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setIsSubmitting(true);
+    try {
+      const updated = await userService.updateUser(user.id, {
+        firstName,
+        lastName,
+        email,
+        password: password || undefined,
+      });
+      onSaved(updated);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <Modal title={`Edit ${user.firstName} ${user.lastName}`} onClose={onClose}>
+      {error && <div className="form-banner-error">{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="editFirstName">First name</label>
+          <input id="editFirstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+        </div>
+        <div className="form-group">
+          <label htmlFor="editLastName">Last name</label>
+          <input id="editLastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+        </div>
+        <div className="form-group">
+          <label htmlFor="editEmail">Email</label>
+          <input
+            id="editEmail"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label htmlFor="editPassword">New password</label>
+          <input
+            id="editPassword"
+            type="password"
+            placeholder="Leave blank to keep current password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+        <div className="modal-actions">
+          <button type="button" className="btn btn-secondary" onClick={onClose}>
+            Cancel
+          </button>
+          <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save changes"}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }

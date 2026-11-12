@@ -93,8 +93,16 @@ public class Notification {
         return relatedProject;
     }
 
+    public void setRelatedProject(Project relatedProject) {
+        this.relatedProject = relatedProject;
+    }
+
     public Task getRelatedTask() {
         return relatedTask;
+    }
+
+    public void setRelatedTask(Task relatedTask) {
+        this.relatedTask = relatedTask;
     }
 
     public Instant getCreatedAt() {

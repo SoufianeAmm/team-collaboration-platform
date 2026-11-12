@@ -51,8 +51,10 @@ public class Task {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
+    // Nullable so a deleted user's created tasks aren't force-deleted with them - the task
+    // just loses its "created by" attribution instead.
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_id", nullable = false)
+    @JoinColumn(name = "created_by_id")
     private User createdBy;
 
     private LocalDate dueDate;
@@ -141,6 +143,10 @@ public class Task {
 
     public User getCreatedBy() {
         return createdBy;
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
     }
 
     public LocalDate getDueDate() {

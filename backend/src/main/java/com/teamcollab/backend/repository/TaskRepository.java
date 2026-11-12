@@ -12,6 +12,7 @@ import java.util.List;
 public interface TaskRepository extends JpaRepository<Task, Long> {
     List<Task> findByProject(Project project);
     List<Task> findByAssignedUser(User assignedUser);
+    List<Task> findByCreatedBy(User createdBy);
 
     // Powers the deadline-approaching scheduled job.
     List<Task> findByDueDateAndStatusNot(LocalDate dueDate, TaskStatus excludedStatus);

@@ -29,7 +29,7 @@ public record TaskResponse(
                 task.getPriority(),
                 task.getAssignedUser() == null ? null : UserResponse.from(task.getAssignedUser()),
                 task.getProject().getId(),
-                UserResponse.from(task.getCreatedBy()),
+                task.getCreatedBy() == null ? null : UserResponse.from(task.getCreatedBy()),
                 task.getDueDate(),
                 task.getCreatedAt(),
                 task.getUpdatedAt()

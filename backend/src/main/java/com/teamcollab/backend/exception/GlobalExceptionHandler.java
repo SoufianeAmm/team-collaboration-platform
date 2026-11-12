@@ -41,6 +41,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(UserHasActiveProjectsException.class)
+    public ResponseEntity<ErrorResponse> handleUserHasActiveProjects(UserHasActiveProjectsException ex) {
+        return build(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(InvalidFileTypeException.class)
     public ResponseEntity<ErrorResponse> handleInvalidFileType(InvalidFileTypeException ex) {
         return build(HttpStatus.BAD_REQUEST, ex.getMessage());

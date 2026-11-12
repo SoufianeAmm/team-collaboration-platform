@@ -2,10 +2,12 @@ package com.teamcollab.backend.controller;
 
 import com.teamcollab.backend.dto.UpdateProfileRequest;
 import com.teamcollab.backend.dto.UpdateRoleRequest;
+import com.teamcollab.backend.dto.UpdateUserRequest;
 import com.teamcollab.backend.dto.UserResponse;
 import com.teamcollab.backend.security.UserPrincipal;
 import com.teamcollab.backend.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -57,5 +59,19 @@ public class UserController {
     public UserResponse updateRole(@PathVariable Long id, @Valid @RequestBody UpdateRoleRequest request,
                                     @AuthenticationPrincipal UserPrincipal principal) {
         return UserResponse.from(userService.updateRole(id, request.getRole(), principal.getUser()));
+    }
+
+    @PatchMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest request,
+                                    @AuthenticationPrincipal UserPrincipal principal) {
+        return UserResponse.from(userService.updateUser(id, request, principal.getUser()));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
+        userService.deleteUser(id, principal.getUser());
     }
 }
